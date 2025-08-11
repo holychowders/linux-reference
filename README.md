@@ -1116,5 +1116,5 @@ If you forgot to use `sudo` to open a file, you can redirect the contents of the
 
 ## Credits
 
-[![GitHub Repo](https://img.shields.io/badge/GitHub%20Repo-181717?logo=github&logoColor=white)](https://github.com/holychowders/linux-reference/)
-[![GitHub Profile](https://img.shields.io/badge/GitHub%20Profile-181717?logo=github&logoColor=white)](https://github.com/holychowders/)
+- GitHub repo: <https://github.com/holychowders/linux-reference>
+- GitHub profile: <https://github.com/holychowders>
