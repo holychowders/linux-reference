@@ -1,10 +1,10 @@
 # Linux Reference
 
-Created by [`holychowders`](https://github.com/holychowders/linux-reference)
+My personal Linux reference
 
 ## Table of Contents
 
-- [TODO](#todo)
+- [Todo](#todo)
 - [Other Resources](#other-resources)
 - [General and Misc](#general-and-misc)
 - [Text and File Processing](#text-and-file-processing)
@@ -16,7 +16,7 @@ Created by [`holychowders`](https://github.com/holychowders/linux-reference)
 - [Networking](#networking)
   - [Misc](#misc)
   - [netplan](#netplan-netplan-runtime-cli)
-  - [Traffic Analysis](#traffic-analysis)
+  - [Traffic Analysis and Manipulation](#traffic-analysis-and-manipulation)
   - [SSH](#ssh)
   - [netfilter Firewall Framework](#netfilter-firewall-framework)
   - [netcat](#netcat-arbitrary-tcp-and-udp-connections-and-listens)
@@ -29,8 +29,9 @@ Created by [`holychowders`](https://github.com/holychowders/linux-reference)
 - [Vim](#vim)
 - [Binary Analysis](#binary-analysis)
 - [ASCII Art and Silly Stuff](#ascii-art-and-silly-stuff)
+- [Credits](#credits)
 
-# TODO
+# Todo
 
 - Distinguish standard vs non-standard tools and filter out frivolous tools
 - Distinguish or extract the most useful commands
@@ -1112,3 +1113,8 @@ If you forgot to use `sudo` to open a file, you can redirect the contents of the
 - `echo Welcome | boxes | figlet`
 - `echo Welcome back @home, holy! | boxes -d bear -s $COLUMNS`
 - `echo Welcome back @home, holy! | boxes -d spring -s $((COLUMNS-9))`
+
+## Credits
+
+[![GitHub Repo](https://img.shields.io/badge/GitHub%20Repo-181717?logo=github&logoColor=white)](https://github.com/holychowders/linux-reference/)
+[![GitHub Profile](https://img.shields.io/badge/GitHub%20Profile-181717?logo=github&logoColor=white)](https://github.com/holychowders/)
