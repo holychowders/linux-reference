@@ -150,7 +150,9 @@ My personal Linux reference
 
 ## Access Control
 
-### Standard Group-Based Permissions
+### DAC (Discretionary Access Control)
+
+DAC is the baseline access control scheme, where the owner of a resource (file, process, etc) specifies its permissions.
 
 - **NOTE!** When changing file permissions, especially recursively, beware of changing directories, regular files, scripts, and so on indiscriminately
   - Typically, you'll want to use `find` in the form of `find <path> -type d -exec chmod -c <xxx> {} +` to set the appropriate permissions for, in this example, directories, and using `-type d` for directories
@@ -158,7 +160,7 @@ My personal Linux reference
       - Directory: With `r` set on a directory, a user can read its contents. If `x` is also set, a user can `cd` into the directory
       - Regular file: With `r` set on a regular, a user can read its contents. If `x` is also set, a user can execute it. *This should not be set if the file is not supposed to be a directly-executable script*
       - Thus, while it's okay to mark subdirectories with the `x` bit (if you're okay with the user traversing them), setting `x` on regular files should be done discriminately, not en mass
-- `chmod` (*change file mode bits*; deals with the default, regular group-based permissions scheme)
+- `chmod` (*change file mode bits*)
   - `-c` to show changes
   - `-R` for recursive
 - `chattr` (*change file attributes on a Linux file system*)
@@ -169,13 +171,24 @@ My personal Linux reference
   - `chown -c <user> <file>` to change `<file>`'s `<owner>` to `<owner>` and show changes made (`-c`)
   - `-R` for recursive
 
-### ACL (Access Control List) Permissions
+### ACL (Access Control List)
 
-- `setfacl` and `getfacl` deal with the Access Control List feature (if enabled). It takes priority over group permissions
+ACL extends/compliments the standard DAC scheme, providing more fine-grained control over resource permissions.
+
+See `man acl`
+
+- `getfacl` (*get file access control lists*)
+- `setfacl` (*set file access control lists*)
   - Setting the default ACL for a directory causes new subdirectories and files to inherit those default ACLs
   - `setfacl -m u:<username>:rwx <file>` to allow R/W/X on file for the user
   - `setfacl -m u::rwx <file>` to allow R/W/X on file any users
   - `setfacl -x u:<username> <file>` to remove the ACL permissions set for the user
+
+### MAC (Mandatory Access Control)
+
+MAC is another access control scheme which provides a global configuration of resource permissions, typically managed by `root` rather than resource owners. The kernel checks DAC and ACL permissions on resource access before MAC, overriding the former two if more restrictive.
+
+It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux kernel modules.
 
 # Process Management
 
@@ -304,20 +317,33 @@ My personal Linux reference
 
 # System Management and Observability
 
-- `sar` (*collect, report, or save system activity information*)
 - `hostname` (*show or set the system's host name*)
   - `/etc/hostname` specifies the persistent hostname (read on startup)
   - `hostname -I` to display IP addresses
-- `uptime` (*tell how long the system has been running* and how many users are currently logged in)
+- `uptime` (*tell how long the system has been running*, load averages, and how many users are logged in)
   - Reads and processes `/proc/uptime`
-
-## Distribution Information
-
 - `cat /etc/*release` to see system distribution information
+  - See `find /etc/*release` to see files read to obtain this information
 - `uname` (*print system information*)
   - `uname -a` to print all information
 - `lsb_release` (*print distribution-specific information (minimal implementation)*)
   - `lsb_release -a` to show distributor ID, description, release number, and codename
+- `cat /proc/cmdline` to see kernel command line options (**TODO**: Why is this different than the command line shown in `dmesg | head`?)
+
+## Logging
+
+- `sar` (*collect, report, or save system activity information*)
+- `dmesg` (*print or control the kernel ring buffer*)
+  - `dmesg -Tw` (show log messages in human-readable time format (`-T`) and in real time (`-w`))
+  - `dmesg | head` to see the early kernel command line options (**TODO**: Why is this different than shown in `cat /proc/cmdline`?)
+- `/var/log/` contains
+  - `/var/log/dmesg`
+  - `/var/log/auth.log`
+  - `/var/log/apt/history.log`
+  - `/var/log/syslog`
+  - ...and more
+- `loki`
+- `syslogger`
 
 ## Devices
 
@@ -342,24 +368,6 @@ My personal Linux reference
 - `free` (*display amount of free and used memory in the system*)
   - `free -h` to display in human-readable formats
 - `vmstat -S M` (show virtual memory statistics in units of MB `-S M`)
-- `cat /proc/cmdline` to see kernel command line options (**TODO**: Why is this different than the command line shown in `dmesg | head`?)
-
-## Logging
-
-- `dmesg` (*print or control the kernel ring buffer*)
-  - `dmesg -Tw` (show log messages in human-readable time format (`-T`) and in real time (`-w`))
-  - `dmesg | head` to see the early kernel command line options (**TODO**: Why is this different than shown in `cat /proc/cmdline`?)
-- `/var/log/` contains
-  - `/var/log/dmesg`
-  - `/var/log/auth.log`
-  - `/var/log/apt/history.log`
-  - `/var/log/syslog`
-  - ...and more
-
-## Automated Log Backup
-
-- `loki`
-- `syslogger`
 
 ## `systemd` (*systemd system and service manager*)
 
