@@ -74,6 +74,7 @@ My personal Linux reference
   - `-c <command>` to run a command as the user
   - `-s <shell>` to specify shell
   - `-l` to start the shell as a login shell
+- `sudo -i` to run the login shell as `root` (ie, become `root`)
 - `env` (*run a program in a modified environment*)
 - `printenv` (*print all or part of environment*)
 - Dates and Time
@@ -93,6 +94,12 @@ My personal Linux reference
   - `dpkg -S`
 - `apt`
   - `apt list --installed` to list installed packages
+- `nl` (*number lines of files*)
+- `tee` (*read from standard input and write to standard output and files*)
+  - `date | tee <file>` writes the output of `date` to standard output and `<file>`
+    - `tee -a <file>` to append to `<file>` instead of overwrite
+- `cat /dev/urandom` (*When read, the `/dev/urandom` device returns random bytes using a pseudorandom number generator seeded from the entropy  pool*)
+  - See `man urandom`
 
 # Text and File Processing
 
@@ -101,19 +108,26 @@ My personal Linux reference
 - `sort` (*sort lines of text files*)
   - `-n` to sort numerically instead of lexicographically
   - `-r` to reverse order
+  - `-k` to sort by key
+    - `sort -k 2 <file>` to sort by the second column
 - `uniq` (*report or omit repeated lines*)
 - `tr` (*translate or delete characters*)
 - `grep` (*print lines that match patterns*)
   - `grep -Iri --exclude-dir=.git "<search-pattern>"` to search `<search-pattern>`, excluding binaries (`-I`), recursive (`-r`), case insensitive (`-i`), and excluding `.git/`
   - `grep -wE "53|67|68" /etc/services` to look up what ports 53, 67, and 68 correspond to in `/etc/services`
+  - `grep '^word' <file>` to find instances of `word` that are at the beginning of a line
   - `-E` to allow "extended" regular expressions (or use `egrep`)
   - `-R` to search recursively through subdirectories (or use `rgrep`)
   - `-F` to interpret `<search-pattern>` as fixed strings, not regular expressions
   - `-w` to search whole words
   - `-l` to print only the filename on match and continues to next file
   - `-v` to print non-matching lines
+  - `-e` protects `-` in expressions containing `-`
 - `sed` (*stream editor for filtering and transforming text*)
   - `sed -n '275p' <file>` to print out the 275th line of `<file>`
+- `awk` (*pattern scanning and processing language*)
+  - `awk '{print $2}'` to print the second column of standard input
+  - `awk '{if ($1>200) print $1,$2}'` to check if the first column of standard input is greater than 200 and print the first two columns if so
 - `cut` (*remove sections from each line of files*)
   - `cut -d ' ' -f1 <file>` to cut the first (`-f1`) section from `<file>` delimited by blank spaces
 - `tail`
@@ -147,6 +161,9 @@ My personal Linux reference
 - `mkfs` (*build a linux filesystem*; lets you format a device)
   - `mkfs.vfat /dev/<device>`
 - `stat` (*display file or file system status*)
+- `dd` (*convert and copy a file*)
+  - `if=<file>` to specify a file instead of standard input
+- `ls -l <file-name>` follows the format `<access-permissions> <number-of-hard-links> <UID> <GID> <creation-month> <creation-day> <creation-time> <file-name>`
 
 ## Access Control
 
@@ -190,12 +207,38 @@ MAC is another access control scheme which provides a global configuration of re
 
 It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux kernel modules.
 
+#### SELinux (Security-Enhanced Linux)
+
+*Security-Enhanced Linux (SELinux) is an implementation of a flexible mandatory access control architecture in the Linux operating system*
+
+- See
+  - `man selinux`
+  - Red Hat Enterprise Linux documentation on SELinux: <https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/using_selinux/getting-started-with-selinux>
+  - Rocky Linux documentation on SELinux: <https://docs.rockylinux.org/guides/security/learning_selinux/>
+- `sestatus` for SELinux status
+  - `-v` to see file and process contexts
+  - `-b` to see policy booleans
+- Configuration: `/etc/selinux/config`
+- `getenforce` (*get the current mode of SELinux*)
+- `setenforce` (*modify the mode SELinux is running in*)
+  - `setenforce [ Enforcing | Permissive | 1 | 0 ]`
+- `ls -Z [<file>]` (*print any security context*)
+- `ps -eM` or `ps axZ` to see the security label of every running process
+- `getsebool` to get SELinux boolean values
+  - `getsebool -a` to get all boolean values
+  - `getsebool httpd_can_connect_ftp` to get value of `getsebool httpd_can_connect_ftp` boolean
+- `setsebool` (*set SELinux boolean value*)
+  - `setsebool httpd_can_network_connect on` to set the `httpd_can_connect_ftp` boolean on, resets on reboot
+  - `setsebool -P httpd_can_network_connect on` to set the `httpd_can_connect_ftp` boolean on, permanent (`-P`)
+
 # Process Management
 
-- `echo $$` to print the PID of this current running process
+- The current process:
+  - `echo $$` to print the PID of this current running process
+  - `cd /proc/self/` to access the data for the current running process
 - `strace` (*trace system calls and signals*)
   - `strace -p <PID>` to monitor syscalls made by process `<PID>`
-  - `sudo strace -p <PID> -e trace=read` to trace `read` syscalls emitted from process `<PID>`
+  - `strace -p <PID> -e trace=read` to trace `read` syscalls emitted from process `<PID>`
   - `strace <command>` to run `<command>` under `strace` observation
   - **Mix and Match**: `strace -p $(pgrep <process-name>)`
 - `lsof` (*list open files*)
@@ -278,7 +321,6 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 ## User and Group Management
 
-- See File Attributes in [Storage](#storage)
 - Group accounts:
   - `groupmod` (*modify a group definition on the system*)
     - `groupmod -U <user> -a <group>` to append (add) (`-a`) user `-U <user>` to `<group>`
