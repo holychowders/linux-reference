@@ -184,7 +184,7 @@ DAC is the baseline access control scheme, where the owner of a resource (file, 
 - `chgrp` (*change group ownership*)
   - `chgrp -c <group> <file>` to change `<file>`'s `<group>` to `<group>` and show changes made (`-c`)
     - `-R` for recursive
-- `chown` (*change group ownership*)
+- `chown` (*change file owner and group*)
   - `chown -c <user> <file>` to change `<file>`'s `<owner>` to `<owner>` and show changes made (`-c`)
   - `-R` for recursive
 
