@@ -23,6 +23,7 @@ My personal Linux reference
   - [dnsutils](#dnsutils)
   - [net-tools](#net-tools-deprecated-in-favor-of-iproute2)
   - [iproute2](#iproute2-replaces-net-tools)
+- [Docker](#docker)
 - [Git](#git)
 - [GDB](#gdb)
 - [Bash](#bash)
@@ -965,6 +966,75 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
     - `ip -s link` to show all link statistics
     - `ip -s link show eth0` to show `eth0` interface statistics
 - `tc` (*show / manipulate traffic control settings*)
+
+# Docker
+
+- See the Docker CLI reference: <https://docs.docker.com/reference/cli/docker>
+- See the Dockerfile reference: <https://docs.docker.com/reference/dockerfile>
+- See Docker Hub image search: <https://hub.docker.com/search>
+
+## Example Uses
+
+- [./docker-examples/](./docker-examples/)
+- [Inventory Management System](https://github.com/holychowders/inventory_management_system)
+
+## Useful Images
+
+- The `alpine` image is very small, making it really fast to pull down, start up, and has `busybox` pre-installed by default. This all allows for quick testing.
+- The `python:3.xx-alpine` images are typically slimmer than the `python:3.xx-slim` slim Debian images, but have fewer features
+
+## Misc Commands
+
+- `docker scout` (check vulnerabilities in base images; extremely nifty)
+  - `docker scout recommendations` to get recommendations on last built image
+  - `docker scout recommendations --tag <image>` to get recommendations
+- `docker network`:
+  - `docker network ls` lists networks available to connect to a container
+  - `docker network inspect <network-name>` to inspect a network's configuration, including connected containers and their IP addresses
+- `docker builder prune -a` to remove all image build cache
+
+## Images
+
+- `docker image prune` to remove dangling images (images not tagged or referenced by any containers)
+  - `-a` to remove all images currently unused (without an associated running container)
+- `docker [image] build . -t <image-name>:<optional-tag>` to build the image specified by the current directory's Dockerfile
+  - `docker [image] build . -o tempfs` to build an image from current directory's Dockerfile and dump its filesystem to a directory
+- `docker image[s | ls]` to list images
+  - `-q` to list IDs only
+- `docker [container] commit <container> [<image-name>:<tag>]` persists a running container as a new image
+
+## Containers
+
+- `docker container ls` or `docker [container] ps` to see running containers
+  - `-a` to see all containers
+  - `-q` to list container IDs only
+- `docker [container] inspect <container>` to view a container's configuration
+- `docker [container] top <container>` to list a container's running processes
+- `docker [container] exec -it <container> <command>` to execute `<command>` in interactive mode with an explicitly allocated TTY
+  - Use the same command without `-it` to execute a non-interactive command (one which does not expect STDIN to remain open during execution) within a container
+    - For example, `apk --version` would execute and exit, no input/interaction required, just output
+- `docker [container] attach <container>` to attach to a container
+- Stopping containers:
+  - `docker [container] stop <container>` to stop a container from running
+  - `docker [container] stop $(docker ps -q)` to stop all containers from running
+  - `docker [container] kill <container>` to forcefully kill (SIGKILL by default) a container
+- Removing containers:
+  - `docker [container] rm [-f] <container>` to remove a container
+    - `-f` to forcefully kill (SIGKILL) if running and then remove
+  - `docker [container] prune` to remove all stopped containers
+
+### Launching
+
+- `docker [container] start <container>` (*start one or more stopped containers*)
+- `docker [container] run` (*create and run a new container from an image*)
+  - `-a` to attach STDOUT/STDERR
+  - `docker [container] run -[d]it [--rm | --restart=always] [--name <container-name>] <image-name>` starts up a container and attaches to an interactive shell for the container of the specified image.
+    - `--rm` deletes container on stop
+    - `-d` starts detached
+    - `--restart=always` restarts the container under all circumstances (reboot, crash, etc) execpt manual stop/kill via Docker
+    - `--name <container-name>` provides a name to the container
+  - `docker [container] run -dit  --name <container>  --network <network-name>  <image-name>  sh` creates and starts up a container with the assigned name, network, and image. It starts in detached mode running `sh`.
+    - **NOTE**: New containers are generally added to the default bridge network, `docker0`
 
 # Git
 

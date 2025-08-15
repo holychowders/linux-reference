@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -x -o pipefail
+
+docker network create net-test # bridge is default
+
+for i in 1 2 3; do
+    cname=net-c$i 
+    docker run -dit  --name $cname  --network net-test  ubuntu  sh
+    docker exec -it  $cname  sh -c "apt update && apt upgrade -y && apt install -y curl net-tools"
+done
+
+docker network inspect net-test
+
+docker ps
+
+cat <<EOF
+Next, try pinging the containers against each other.
+You will notice that \`curl ifconfig.me\` from each container will return the host's public IP address.
+This is because the bridge network uses NAT through the host for outbound traffic.
+The containers will not be reachable from other machines unless the host sets up port mapping to the containers.
+EOF

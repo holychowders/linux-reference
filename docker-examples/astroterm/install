@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -ex
+shellcheck "$0"
+
+docker image build . -t astroterm
+sudo ln -svi "$(pwd)"/run /bin/astroterm

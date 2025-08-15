@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -x
+
+docker stop net-c1 net-c2 net-c3
+docker rm net-c1 net-c2 net-c3
+docker network rm net-test
+
+echo Everything should now be destroyed

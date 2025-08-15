@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -x
+
+ip a
+nc -vlp 1234
