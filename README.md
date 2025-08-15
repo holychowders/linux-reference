@@ -968,6 +968,8 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 # Git
 
+- `git log --diff-filter=A -- <relative-path/file>` to search logs for diffs where a file was added
+
 ## `git subtree` (*Merge subtrees together and split repository into subtrees*)
 
 - Manpage
