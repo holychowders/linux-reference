@@ -1,6 +1,6 @@
 # Linux Reference
 
-My personal Linux reference
+My personal Linux system administration reference
 
 ## Table of Contents
 
