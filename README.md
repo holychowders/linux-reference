@@ -44,10 +44,6 @@ My personal Linux system administration reference
 
 # General and Misc
 
-- Intrusion detection systems
-  - `aide`
-  - `snort`
-  - `tripwire`
 - BusyBox is a package that contains many core Unix utilies needed for debugging. It's useful to install on a minimal machine when testing.
   - `busybox <common-unix-utility>` if you're just going to run a single command, maybe two
   - `busybox --install <dir-path>` to install the commands to that directory (usually `/sbin`) for standalone use of all commands
@@ -89,23 +85,33 @@ My personal Linux system administration reference
     - `timedatectl` to see current time settings
     - `timedatectl set-timezone America/Los_Angeles` to set timezone to Los Angeles
     - `timedatectl list-timezones`
-- `dpkg` (*package manager for Debian*)
-  - `dpkg -l`
-  - `dpkg -L`
-  - `dpkg -S`
-- `apt`
-  - `apt list --installed` to list installed packages
-  - `apt show <package>` to show information for a package
-  - `apt search <string>` to find packages containing a specified string in their information (useful for finding the package a command belongs to)
+- Package management
+  - `dpkg` (*package manager for Debian*)
+    - `dpkg -l`
+    - `dpkg -L`
+    - `dpkg -S`
+  - `apt`
+    - `apt list --installed` to list installed packages
+    - `apt show <package>` to show information for a package
+    - `apt search <string>` to find packages containing a specified string in their information (useful for finding the package a command belongs to)
 - `nl` (*number lines of files*)
 - `tee` (*read from standard input and write to standard output and files*)
   - `date | tee <file>` writes the output of `date` to standard output and `<file>`
     - `tee -a <file>` to append to `<file>` instead of overwrite
 - `cat /dev/urandom` (*When read, the `/dev/urandom` device returns random bytes using a pseudorandom number generator seeded from the entropy  pool*)
   - See `man urandom`
+- Intrusion detection systems
+  - `aide`
+  - `snort`
+  - `tripwire`
+- `exiftool` (*read and write meta information in files*)
 
 # Text and File Processing
 
+- `seq` (*print a sequence of numbers*)
+  - `seq [from=1] <to>` to print numbers `from` to `to`, each on a new line
+  - `seq 5` to print numbers 1 through 5, each on a new line
+  - `seq 0 5` to print numbers 0 through 5, each on a new line
 - `wc` (*print newline, word, and byte counts for each file*)
   - `wc -l` to count lines
 - `sort` (*sort lines of text files*)
@@ -142,6 +148,7 @@ My personal Linux system administration reference
 
 # Storage
 
+- `/dev/sda1` is the first partition (`1`) of the first detected (`a`) disk (`sd`, short for "SCSI Disk", an old format)
 - `tar`
   - `tar -vczf files.tar.gz file1 file2 file3` to create (`-c`) a `gzip`-compressed (`-z`) archive named `files` (`-f files`) out of the listed files
   - `tar -vxf files.tar.gz` to both decompress (if applicable) and extract (`-x`) an archive named `files` (`-f files`) out into the CWD
@@ -151,7 +158,9 @@ My personal Linux system administration reference
   - `find <path> -executable` to find files with execution permissions
   - `find <path> -name "*.sh"` to find files with `.sh` a suffix
 - `mkfifo` (*make FIFOs (named pipes)*)
-- `du -h` (*estimate file space usage* in human-readable format)
+- `du` (*estimate file space usage*)
+  - `-h` for human-readable format
+  - `-s` for summary
 - `df -h` (*report file system space usage* in human-readable format)
 - `lsblk` (*list block devices*)
   - `lsblk`
@@ -288,8 +297,8 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 - `whoami`(*print effective user name*)
 - `id` (*print real and effective user and group IDs*)
-  - `id`
-  - `id <user>`
+  - `id` for output on current user
+  - `id <user>` for output on specified user
 - `groups` (*print the groups a user is in*; **probably prefer `id`**)
   - `groups` to show the groups the current user is in
   - `groups <user>` to show the groups `<user>` is in
@@ -301,6 +310,7 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - `w` (*show who is logged on and what they are doing*; **probably prefer `who`**)
   - `users` (*print the user names of users currently logged in to the current host*; **probably prefer `who` or `w`**)
 - `last` (*show a listing of last logged in users*)
+  - `last` outputs from most recent to least recent, so use with `head` or `less`
   - `last -a` reads the binary log file `/var/log/wtmp` to see past logins, with host names at the end (`-a`)
   - `last <username>` to see past logins from `<username>`
   - `last -p <time>` to see users who were present at `<time>`
@@ -412,9 +422,10 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 ## Memory
 
-- `cat /proc/meminfo` to see memory free and used
+- `cat /proc/meminfo` to see detailed memory information
 - `free` (*display amount of free and used memory in the system*)
-  - `free -h` to display in human-readable formats
+  - `-h` for human-readable
+  - `-t` to include total
 - `vmstat -S M` (show virtual memory statistics in units of MB `-S M`)
 
 ## `systemd` (*systemd system and service manager*)
@@ -437,11 +448,13 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - Front-end (or sometimes a symlink) to `systemd-resolve` and primary way of interacting with `systemd-resolved`
   - `/etc/resolv.conf` is the standard DNS resolver configuration file for specifying DNS nameservers, usually managed by `systemd-resolved`, but sometimes by `netplan` and others depending on distro and configuration choice
   - `resolvectl` to display the global and per-link DNS settings currently in effect
-  - `resolvectl status <link>` to display the DNS settings currently in effect for a link (eg, `eth0`)
-  - `resolvectl query google.com` to query DNS
-  - `resolvectl statistics` to display general resolver statistics, including information whether DNSSEC is enabled and available, as well as resolution and validation statistics
-  - `resolvectl show-server-state` to display detailed server state information, per DNS Server
-  - `resolvectl monitor` to display a continuous stream of local client resolution queries and their responses
+  - Options
+    - `status <link>` to display the DNS settings currently in effect for a link
+    - `query <hostname|address>`
+    - `statistics` to display general resolver statistics, including information whether DNSSEC is enabled and available, as well as resolution and validation statistics
+    - `show-server-state` to display detailed server state information, per DNS Server
+    - `monitor` to display a continuous stream of local client resolution queries and their responses
+    - `flush-caches`
 - `systemd-resolve` (**deprecated** in favor of `resolvectl`)
 - `systemd-analyze` (*analyze and debug system manager*)
   - `systemd-analyze blame` to *print all running units, ordered by initialization time*
@@ -530,6 +543,7 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - `--release`
   - `--rebind`
   - `--renew`
+  - `--dumplease [interface]` to dump lease information for all interfaces or for a specific one
 
 ## `netplan` (*Netplan runtime CLI*)
 
@@ -965,13 +979,13 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
     - *NOTE*: Almost certainly use `watch -n 1 w` instead for this use case
 - `ip` (*show / manipulate routing, network devices, interfaces and tunnels*)
   - `-br` for brief output (supported by `addr`, `link`, `neigh`)
-  - `ip addr`
+  - `addr`
     - `ip addr del 192.168.0.88/24 dev ens33` to delete that IP prefix on that interface
-  - `ip monitor` (*watch for netlink messages*)
+  - `monitor` (*watch for netlink messages*)
     - Useful when setting up or modifying interfaces, routes, etc
-  - `ip neigh` (*show current neighbor table in kernel*) (ARP or NDISC cache entries)
-  - `ip route` (*show table routes*)
-  - `ip link` (*show current link-layer links between interfaces* and MAC addresses)
+  - `neigh` (*show current neighbor table in kernel*) (ARP or NDISC cache entries)
+  - `route` (*show table routes*)
+  - `link` (*show current link-layer links between interfaces* and MAC addresses)
     - `ip -s link` to show all link statistics
     - `ip -s link show eth0` to show `eth0` interface statistics
 - `tc` (*show / manipulate traffic control settings*)
@@ -1104,11 +1118,10 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - Instead of `source`ing your Bash configs, use `exec bash`, which will actually wholly replace the current shell and reset all state to avoid unexpected behavior and garbage buildup, including closing all processes held open by the shell.
   - Tip: Use `exec bash -l` if you're updating your `.bash_profile`.
 
-## Shellcheck and Shell Options
+## Shellcheck, Shell Options, and shfmt
 
-- It might be worth starting shell scripts with `set -euo pipefail; shellcheck "$0"; shfmt "$0"`
 - Use `shellcheck` on important scripts to detect errors and potential bugs
-- Use `set` with options to improve safety and predictabilty of shell scripts
+- Use `set` with options to improve safety and predictabilty of shell scripts (use within shell scripts)
   - `-o posix` to run in Posix mode
   - Some common options for safety:
     - `-e` to exit immediately if a command exits with a non-zero status
@@ -1119,6 +1132,10 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
     - `-v` to print shell input lines as they are read
     - `-x` to print commands and their arguments as they are executed
     - `-n` to read commands but not execute them
+- `shfmt` (*format shell programs*)
+  - `-i <indent>` to specify indentation
+  - `-w` to format the file in place (instead of writing to standard output)
+  - `-d` to error with a diff of the changes
 
 ## Printing
 
@@ -1154,6 +1171,7 @@ EOF
 - `var=2`
   - `echo '$var'` -> `$var`
   - `echo "$var"` -> `2`
+- `echo {1..5}` -> `1 2 3 4 5`
 
 ## Loops
 
