@@ -95,6 +95,8 @@ My personal Linux system administration reference
   - `dpkg -S`
 - `apt`
   - `apt list --installed` to list installed packages
+  - `apt show <package>` to show information for a package
+  - `apt search <string>` to find packages containing a specified string in their information (useful for finding the package a command belongs to)
 - `nl` (*number lines of files*)
 - `tee` (*read from standard input and write to standard output and files*)
   - `date | tee <file>` writes the output of `date` to standard output and `<file>`
@@ -392,15 +394,18 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 - `lspci` (*list all PCI devices*)
 - `lsusb` (*list USB devices*)
-- `iostat` (*Report Central Processing Unit (CPU) statistics and input/output statistics for devices and partitions*)
+- `iostat` (*Report Central Processing Unit (CPU) statistics and input/output statistics for devices and partitions*; from `sysstat`)
+  - `iostat [interval [count]] [-d] [device-name]` to report block device statistics
+  - `-c` to report CPU statistics
 
 ## CPU
 
 - See `iostat`
 - `lscpu` (*display information about the CPU architecture*)
 - `chcpu` (*configure CPUs*)
-- `mpstat` (*report processor-related statistics*)
-  - `mpstat -P ALL 0` to report processor-related statistics for all individual processors (`-P ALL`) at 0-second intervals (report only once))
+- `mpstat` (*report processor-related statistics*; from `sysstat`)
+  - `mpstat` to print a report
+  - `mpstat 1` to print a report every 1 second
 - `nproc` (*print the number of processing units available*)
 - `cat /proc/cpuinfo` to see CPU specs and info
   - `cat /proc/cpuinfo | grep -c processor` to count the number of processors
@@ -430,7 +435,7 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - `journalctl -u wpa_supplicant` to see logs pertaining to the `wpa_supplicant` service
 - `resolvectl` (*resolve domain names, IPV4 and IPv6 addresses, DNS resource records, and services; introspect and reconfigure the DNS resolver*)
   - Front-end (or sometimes a symlink) to `systemd-resolve` and primary way of interacting with `systemd-resolved`
-  - `/etc/resolv.conf` is the standard DNS configuration file, usually managed by `systemd-resolved`, but sometimes by `netplan` and others depending on distro and configuration choice
+  - `/etc/resolv.conf` is the standard DNS resolver configuration file for specifying DNS nameservers, usually managed by `systemd-resolved`, but sometimes by `netplan` and others depending on distro and configuration choice
   - `resolvectl` to display the global and per-link DNS settings currently in effect
   - `resolvectl status <link>` to display the DNS settings currently in effect for a link (eg, `eth0`)
   - `resolvectl query google.com` to query DNS
@@ -489,9 +494,8 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 ## Misc
 
-- `arping`
-  - `arping -i eth0 192.168.0.51` to ARP ping that host via interface `eth0`
-- `/etc/hosts` contains manually-specified DNS resolutions for local lookup before attempting external DNS lookups
+- `/etc/nsswitch.conf` contains configuration for DNS resolution order, as well as for other items
+- `/etc/hosts` contains static DNS configuration (short-circuits external DNS resolution attempts)
   ```hosts
   192.168.0.100 myserver
   ```
@@ -499,11 +503,14 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
     - `tcpdump port 53` to monitor port 53 (DNS) traffic
     - `watch -n 0 arp` to make `arp` run repeatedly very quickly so we can see it attempt to resolve the IP addresses stored in the ARP cache to names for display
     - Add `<ip-addr> <name>` to `/etc/hosts`, save it, and watch the external DNS traffic dissappear due to resolving via the local hosts file
-- See `resolvectl` in [systemd](#systemd-systemd-system-and-service-manager) for more DNS configuration
 - `/etc/services` lists default port service designations
+- See `resolvectl` in [systemd](#systemd-systemd-system-and-service-manager) for configuration of DNS resolvers
 
 ### Commands
 
+- `host` (*DNS lookup utility*)
+- `arping`
+  - `arping -i eth0 192.168.0.51` to ARP ping that host via interface `eth0`
 - `iftop` (*display bandwidth usage on an interface by host*)
 - `ifstat` (*report interface activity, just like iostat/vmstat do for other system statistics*)
 - `knock` (*port-knock client* from `knockd` package)
@@ -899,6 +906,7 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 - **NOTE**: Exact syntax depends on `netcat-traditional` vs `netcat-openbsd` vs `nmap`'s `ncat` and exact version
   - `netcat-traditional` requires `-p` to specify port when listening, while `netcat-openbsd` does not
+- `nc <address> 22` to see if SSH is running on host
 - Scan: `nc -z <host> 1-65535` to scan all ports on `<host>` (may wish to use with `-z` for progress)
 - Simple communication
   - `host1$ nc -l -p 1234` to listen on a host
@@ -956,6 +964,7 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - `ss -a | grep -i ssh` to find sockets/programs running `ssh`, and uids with established SSH connections
     - *NOTE*: Almost certainly use `watch -n 1 w` instead for this use case
 - `ip` (*show / manipulate routing, network devices, interfaces and tunnels*)
+  - `-br` for brief output (supported by `addr`, `link`, `neigh`)
   - `ip addr`
     - `ip addr del 192.168.0.88/24 dev ens33` to delete that IP prefix on that interface
   - `ip monitor` (*watch for netlink messages*)
@@ -1069,6 +1078,11 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 # Bash
 
+- `alias`
+  - `alias` to print all aliases
+  - `alias <name>` to view an alias
+  - `alias <name>=<command>` to set an alias
+  - `unalias` to remove an alias
 - `echo $RANDOM` prints a random number
 - `declare` (*set variable values and attributes*; for advanced variable declaration)
 - `readonly const='my constant'` to set a constant variable
