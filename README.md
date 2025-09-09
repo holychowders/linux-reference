@@ -8,7 +8,7 @@ My personal Linux system administration reference
 - [Other Resources](#other-resources)
 - [General and Misc](#general-and-misc)
 - [Text and File Processing](#text-and-file-processing)
-- [Storage](#storage)
+- [Storage and Filesystem](#storage-and-filesystem)
 - [Logging](#logging)
 - [Process Management](#process-management)
 - [User Administration](#user-administration)
@@ -64,14 +64,6 @@ My personal Linux system administration reference
   - `glow -p -w 0 file.md`
 - `watch` (*execute a program periodically, showing output fullscreen*)
   - `watch -n 1 w` to execute `w` every second (`-n 1`) and refresh the screen with the updated output
-- `su` (*run a command with a substitute user and group ID*)
-  - `su` to drop into a `root` shell
-  - `su <user>` to drop into a `<user>` shell
-  - `su --login <user>` to drop into a `<user>` login shell
-  - `-c <command>` to run a command as the user
-  - `-s <shell>` to specify shell
-  - `-l` to start the shell as a login shell
-- `sudo -i` to run the login shell as `root` (ie, become `root`)
 - `env` (*run a program in a modified environment*)
 - `printenv` (*print all or part of environment*)
 - Dates and Time
@@ -94,7 +86,6 @@ My personal Linux system administration reference
     - `apt list --installed` to list installed packages
     - `apt show <package>` to show information for a package
     - `apt search <string>` to find packages containing a specified string in their information (useful for finding the package a command belongs to)
-- `nl` (*number lines of files*)
 - `tee` (*read from standard input and write to standard output and files*)
   - `date | tee <file>` writes the output of `date` to standard output and `<file>`
     - `tee -a <file>` to append to `<file>` instead of overwrite
@@ -105,22 +96,73 @@ My personal Linux system administration reference
   - `snort`
   - `tripwire`
 - `exiftool` (*read and write meta information in files*)
-
-# Text and File Processing
-
+- `reset` (*initialize or reset terminal state*)
 - `seq` (*print a sequence of numbers*)
   - `seq [from=1] <to>` to print numbers `from` to `to`, each on a new line
   - `seq 5` to print numbers 1 through 5, each on a new line
   - `seq 0 5` to print numbers 0 through 5, each on a new line
+
+# Text and File Processing
+
+- `nl` (*number lines of files*)
+  - `nl <file>` to print out file contents with line numbers
+- `uniq` (*report or omit repeated lines*)
+  - `uniq <file>` to print every unique line from `<file>`, omitting repetitions
+  - `uniq -u <file>` to print every unique line that occurs once in `<file>`
+- `csplit` (*split a file into sections determined by context lines*)
+- `tr` (*translate or delete characters*)
+- `cut` (*remove sections from each line of files*)
+  - `cut -d ' ' -f1 <file>` to cut the first (`-f1`) section from `<file>` delimited by blank spaces
+- `bc` (*an arbitrary precision calculator language*)
+  - `echo '1+2' | bc` to sum the expression
 - `wc` (*print newline, word, and byte counts for each file*)
   - `wc -l` to count lines
+- `head` (*output the first part of files*)
+  - `-n <lines>` to output first `<lines>` lines
+  - `-c <bytes>` to output first `<bytes>` bytes
+- `tail` (*output the last part of files*)
+  - `-n <lines>` to output last `<lines>` lines
+  - `-f <file>` to follow file changes, appending output as file grows
 - `sort` (*sort lines of text files*)
   - `-n` to sort numerically instead of lexicographically
   - `-r` to reverse order
   - `-k` to sort by key
     - `sort -k 2 <file>` to sort by the second column
-- `uniq` (*report or omit repeated lines*)
-- `tr` (*translate or delete characters*)
+- `paste` (*merge lines of a file*)
+  - `paste <file> -sd+` to collapse lines of a file to single line with each element separated by `+`
+    - Example: `seq 100 > numbers; paste numbers -sd+`
+    - **Mix and Match**: `seq 100 > numbers; paste numbers -sd+ | bc` to sum the numbers in `numbers`
+- `sed` (*stream editor for filtering and transforming text*)
+  - `sed -n '275p' <file>` to print out the 275th line of `<file>`
+- `awk` (*pattern scanning and processing language*)
+  - `awk '{print $2}'` to print the second column of standard input
+  - `awk '{if ($1>200) print $1,$2}'` to check if the first column of standard input is greater than 200 and print the first two columns if so
+- Diffing and patching
+  - `diff` (*compare files line by line*)
+    - `diff --color <file1> <file2>`
+  - `patch` (*apply a diff file to an original*)
+
+# Storage and Filesystem
+
+- `hdparm` (*get/set SATA/IDE device parameters*)
+  - `-I /dev/<sata-device>` to list device parameters for a SATA device
+  - `hdparm --security-enhanced-erase NULL /dev/<sata-device>` to perform an optimized secure erase of a SATA device using an empty password (`NULL`)
+- `nvme` (*the NVMe storage command line interface utility*; from `nvme-cli`)
+  - `nvme format /dev/<nvme-device> -s 1` to perform a secure erase of an NVMe disk
+    - See `man nvme-format`
+
+## Information
+
+- `/dev/zero` is a continuous stream of zeroes
+- `stat` (*display file or file system status*)
+- `ls -l <file-name>` follows the format `<access-permissions> <number-of-hard-links> <UID> <GID> <creation-month> <creation-day> <creation-time> <file-name>`
+- `du` (*estimate file space usage*)
+  - `-h` for human-readable format
+  - `-s` for summary
+- `df -h` (*report file system space usage* in human-readable format)
+
+## Searching
+
 - `grep` (*print lines that match patterns*)
   - `grep -Iri --exclude-dir=.git "<search-pattern>"` to search `<search-pattern>`, excluding binaries (`-I`), recursive (`-r`), case insensitive (`-i`), and excluding `.git/`
   - `grep -wE "53|67|68" /etc/services` to look up what ports 53, 67, and 68 correspond to in `/etc/services`
@@ -132,50 +174,84 @@ My personal Linux system administration reference
   - `-l` to print only the filename on match and continues to next file
   - `-v` to print non-matching lines
   - `-e` protects `-` in expressions containing `-`
-- `sed` (*stream editor for filtering and transforming text*)
-  - `sed -n '275p' <file>` to print out the 275th line of `<file>`
-- `awk` (*pattern scanning and processing language*)
-  - `awk '{print $2}'` to print the second column of standard input
-  - `awk '{if ($1>200) print $1,$2}'` to check if the first column of standard input is greater than 200 and print the first two columns if so
-- `cut` (*remove sections from each line of files*)
-  - `cut -d ' ' -f1 <file>` to cut the first (`-f1`) section from `<file>` delimited by blank spaces
-- `tail`
-  - `tail -f <file>` to follow file changes, appending output as file grows
-- Diffing and patching
-  - `diff` (*compare files line by line*)
-    - `diff --color <file1> <file2>`
-  - `patch` (*apply a diff file to an original*)
+- `find`
+  - Common example: `find <path> -name <filename>` to find a file
+  - Flags:
+    - `-exec <command> {} +` execute `<command>` in the current subdirectory, in case we are recursive and in a different directory from which we started
+    - `-executable` to find files with execution permissions
+    - `-name "*.sh"` to find files with `.sh` a suffix
+    - `-perm 777`
+    - `-perm -022`
+    - `-perm /6000` to find setuid (`4000`) and setgid (`02000`) programs
+    - `-type f` to find files
+    - `-type d` to find directories
 
-# Storage
+## Processing
 
-- `/dev/sda1` is the first partition (`1`) of the first detected (`a`) disk (`sd`, short for "SCSI Disk", an old format)
+- `cpio` (*copy files to and from archives*)
+- `mkfifo` (*make FIFOs (named pipes)*)
+- `dd` (*convert and copy a file*)
+  - Flags:
+    - `if=<file>` to specify a file to read from instead of standard input
+    - `of=<file>` to specify a file to write to instead of standard output
+    - `bs=<size>` to specify the block size to both read from the input file and write out to the output file
+    - `count=<count>` to specify the number of times to read/write
+  - Example: `dd if=/dev/zero of=zeroes bs=1M count=2` to read 2MB (`count` blocks of size `1M`) of zeroes from `/dev/zeroes` and write them out to `zeroes`
 - `tar`
   - `tar -vczf files.tar.gz file1 file2 file3` to create (`-c`) a `gzip`-compressed (`-z`) archive named `files` (`-f files`) out of the listed files
   - `tar -vxf files.tar.gz` to both decompress (if applicable) and extract (`-x`) an archive named `files` (`-f files`) out into the CWD
-- `cpio` (*copy files to and from archives*)
-- `find`
-  - `-exec <command> {} +` execute `<command>` in the current subdirectory, in case we are recursive and in a different directory from which we started
-  - `find <path> -executable` to find files with execution permissions
-  - `find <path> -name "*.sh"` to find files with `.sh` a suffix
-- `mkfifo` (*make FIFOs (named pipes)*)
-- `du` (*estimate file space usage*)
-  - `-h` for human-readable format
-  - `-s` for summary
-- `df -h` (*report file system space usage* in human-readable format)
+
+## Data Erasure
+
+- Prefer `hdparm` (SATA) and `nvme-cli` (NVMe) for more proper and significantly faster hardware-based secure erasure (let the drive erase itself internally) rather than software-based erasure (manual sequential writing of bytes), which usually doesn't account for "smarter" modern drive features such as wear leveling or sector remapping, which can prevent actual full secure erasure
+- `shred` (*overwrite a file to hide its contents, and optionally delete it*: **do not use without understanding the caveats listed in the documentation referenced below**; **almost certainly use `hdparm` or `nvme-cli` instead**)
+  - **Read the caveats before use**: <https://www.gnu.org/software/coreutils/manual/html_node/shred-invocation.html#shred-invocation>
+  - `-v` to show progress
+  - `-z` to zero the file after overwriting to hide shredding
+  - `-u` to delete the file after overwriting
+  - Example procedure
+    - `wipefs --all /dev/<device>` (see `wipefs`)
+    - `shred -vz /dev/<device>` to overwrite the disk with random data and then zero
+    - Optional: `blockdev --rereadpt` (see `blockdev`) to inform the kernel that the partition table has been modified (assuming you overwrote a disk with paritions before clearing them out). This may not be enough, and you may need to just reboot instead.
+- `nwipe` (*securely erase disks*)
+
+## Filesystem
+
+### Information
+
+- `/etc/fstab` contains a table of known filesystems
+- `/dev/sda1` would be the first partition (`1`) of the first detected (`a`) disk (`sd`, short for "SCSI Disk", an old format)
 - `lsblk` (*list block devices*)
-  - `lsblk`
+  - `lsblk` to list block devices
+  - `--fs` for an overview of filesystem data
+- `blkid` (*locate/print block device attributes*)
+- `dumpe2fs` (*dump ext2/ext3/ext4 file system information*)
+  - `dumpe2fs /dev/<device>` to dump filesystem information for device
+
+### Management
+
+- `wipefs` (*wipe a signature from a device*)
+  - `wipefs /dev/<device>` to print information about a device and its partitions
+  - `wipefs --all /dev/<device>` to erase all partition signatures and inform the kernel of the change
 - `fdisk` (*manipulate disk partition table*)
-  - `fdisk -l`
-- **Mix and Match**: To mount:
-  - `mkdir -p /mnt/<mount-point>` to create mount point
-  - `mount /dev/<device> /mnt/<mount-point>` to mount a device to mount point
-  - `umount /mnt/<mount-point>` to unmount
+  - `fdisk -l [device]` to list information and partition tables for all devices or the specified device
 - `mkfs` (*build a linux filesystem*; lets you format a device)
   - `mkfs.vfat /dev/<device>`
-- `stat` (*display file or file system status*)
-- `dd` (*convert and copy a file*)
-  - `if=<file>` to specify a file instead of standard input
-- `ls -l <file-name>` follows the format `<access-permissions> <number-of-hard-links> <UID> <GID> <creation-month> <creation-day> <creation-time> <file-name>`
+- `tune2fs` (*adjust tunable file system parameters on ext2/ext3/ext4 file systems*)
+  - `tune2fs -l /dev/<device>` (*list the contents of the file system superblock, including configurable parameters*)
+- `blockdev` (*call block device ioctls from the command line*)
+  - `--rereadpt` to request the kernel to re-read the partition table
+
+#### Mounting
+
+- `findmnt` (*find a filesystem*)
+- `mount` (*mount a filesystem*)
+  - `mount` to see mounted filesystems
+    - Reads from `/proc/mounts` (symlink to `/proc/self/mounts`) (or the **deprecated** `/etc/mtab` on older systems)
+  - `mount /dev/<device> /mnt/<mount-point>` to mount a device to mount point
+- `umount` (*unmount filesystems*)
+  - `umount /mnt/<mount-point>` to unmount filesystem mounted at mount point
+- `/proc/self/mountinfo` contains a table of mounted filesystems (generated by kernel)
 
 ## Access Control
 
@@ -199,6 +275,13 @@ DAC is the baseline access control scheme, where the owner of a resource (file, 
 - `chown` (*change file owner and group*)
   - `chown -c <user> <file>` to change `<file>`'s `<owner>` to `<owner>` and show changes made (`-c`)
   - `-R` for recursive
+- `umask` (*display or set file mode creation mask*)
+  - `umask` to see current file mode creation mask
+  - `umask <mask>` to set the file mode creation mask
+  - Example
+    - With default regular file creation mode `0666` (RW for UGO)
+    - With default umask of `0022`
+    - `touch testfile` will create `testfile` with permissions `0644` (`0666 & ~0022`)
 
 ### ACL (Access Control List)
 
@@ -286,12 +369,22 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 # User Administration
 
+- `su` (*run a command with a substitute user and group ID*)
+  - `su` to drop into a `root` shell
+  - `su <user>` to drop into a `<user>` shell
+  - `su --login <user>` to drop into a `<user>` login shell
+  - `-c <command>` to run a command as the user
+  - `-s <shell>` to specify shell
+  - `-l` to start the shell as a login shell
+- `sudo -i` to run the login shell as `root` (ie, become `root`)
+
 ## User Interaction
 
 - `write` (*send a message to another user*)
   - `write <username> <tty-or-pts>` starts a session where you can send messages to the user on their tty, one way
 - `mesg` (*display (or do not display) messages from other users*)
 - `talk` (*talk to another user*)
+- `wall` (*write a message to all users*)
 
 ## User and Group Awareness and Monitoring
 
@@ -363,12 +456,54 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
     - `passwd -u` to unlock
 - User account configuration and password information
   - `pwconv` to move salted passwords hashes from public `/etc/passwd` to locked down `/etc/shadow` (use on old systems that haven't converted to using `/etc/shadow`)
-  - `/etc/passwd` details user account configuration: `username:x:UID:GID:full_name:home_directory:shell`
+  - `/etc/passwd` details user account configuration: `username:x:UID:GID:full-name:home-directory:shell`
     - The `x` in the password field means that passwords are stored in `/etc/shadow`, which has stricter permissions
+      - `/etc/shadow` format (see `man shadow`): `username:encrypted-password:last-change-date:minimum-age:maximum-age:warning-period:inactivity-period:account-expiration-date:reserved`
     - All users can typically read `/etc/passwd`, but only `root` can modify it
-  - `/etc/passwd` displays user account password information
     - Only `root` can access `/etc/shadow`
     - Salted password hashes are stored rather than the actual plaintext passwords
+
+### Special File Permission Bits (SUID/SGID/Sticky)
+
+- Reading: <https://www.redhat.com/en/blog/suid-sgid-sticky-bit>
+- SUID/SGID
+  - The SUID (setuid) permission bit of a binary executable file
+    - Sets the running EUID to that of the binary executable's owner rather than that of the user who actually executed it (RUID)
+    - Represented by `4` in the *user* execution bit, or symbolic `s` if the owner has execute permission and `S` if the owner does not have execute permission
+  - The SGID (setgid) permission bit of a binary executable file
+    - Sets the running EGID to that of the binary executable's group owner rather than that of the user's primary group that actually executed it (RGID)
+    - Represented by `2` in the *group* execution bit, or symbolic `s` if the group has execute permission, or `S` if the group does not have execute permission
+  - **NOTE(SECURITY)**: For files owned by a privileged user/group, SUID/SGID can permit unprivileged users to execute a program with elevated privileges when the permissions for the file are not locked down (eg, if unprivileged users are allowed to execute an SUID/SGID file)
+    - For security, shells such as Bash ignore setuid and run as the real user
+    - Find SUID/SGID programs with `find / -perm /6000`
+- The "sticky" permission bit
+  - When set on a directory, prevents users from deleting or renaming containing files they do not own
+  - Does nothing when applied to regular files
+  - Represented by `1` or symbolic `t` in the other users execution bit
+- RUID (real user ID) is the UID for the user who launched a process
+- EUID (effective user ID) is the UID from which the process inherits its permissions
+- Octal/symbolic permissions format:
+```
+Bit positions: 0 x 0 0 0 0
+                   S U G O
+                   | | | |
+                   | | | Other users (rwx)
+                   | | Group (rwx)
+                   | User/owner (rwx)
+                   Special (setuid/setgid/sticky)
+UGO bits: 4 2 1
+          r w x
+          | | |
+          | | Execute
+          | Write
+          Read
+
+S bits:   4 2 1
+          | | |
+          | | sticky (replaces Other Users' Execute bit with t if x set or T if x not set)
+          | setgid (SGID; replaces Group's Execute bit with s if x set or S if x not set; affects binaries only)
+          setuid (SUID; replaces User's Execute bit with s if x set or S if x not set; affects binaries only)
+```
 
 # System Management and Observability
 
@@ -507,6 +642,7 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 ## Misc
 
+- `/etc/hosts.allow` (**deprecated**)
 - `/etc/nsswitch.conf` contains configuration for DNS resolution order, as well as for other items
 - `/etc/hosts` contains static DNS configuration (short-circuits external DNS resolution attempts)
   ```hosts
@@ -976,7 +1112,6 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 
 - `ss` (*another utility to investigate sockets*)
   - `ss -a | grep -i ssh` to find sockets/programs running `ssh`, and uids with established SSH connections
-    - *NOTE*: Almost certainly use `watch -n 1 w` instead for this use case
 - `ip` (*show / manipulate routing, network devices, interfaces and tunnels*)
   - `-br` for brief output (supported by `addr`, `link`, `neigh`)
   - `addr`
@@ -1062,8 +1197,36 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 # Git
 
 - `git log --diff-filter=A -- <relative-path/file>` to search logs for diffs where a file was added
+- `git filter-repo` (*rewrite repository history*; external tool)
+  - `git filter-repo --replace-text replacements.txt`
+  - `--dry-run`
+  - `--path <path>` to preserve only that path in the repo history
+  - `--invert-paths --path <path1> --path <path2>` to delete those paths from the repo history
+  - Dry run and preview:
+    - `--dry-run`
+    - `diff --color .git/filter-repo/fast-export.original .git/filter-repo/fast-export.filtered` to preview changes
+- `git reflog` (*manage reflog information*)
+  - `expire` (*prune older reflog entries*)
+    - `--expire=<time> --all` to prune all reflog entries older than `<time>`, making them unreachable (`git gc` will automatically remove loose reflog entries when it decides to)
+- `git gc` (*cleanup unnecessary files and optimize the local repository*)
+  - `--prune=<date>` (*prune loose objects older than date*)
+  - `--aggressive` (*more aggressively optimize the repository at the expense of taking much more time*)
 
-## `git subtree` (*Merge subtrees together and split repository into subtrees*)
+## Sanitizing Secrets
+
+**WARNING: These steps are rough and not to be followed blindly. History rewriting is highly and widely destructive. Read the official documentation carefully.**
+
+- `git clone --mirror --no-local <local-repo-path> <mirror-repo-dest>` to clone a mirror of the local repo, which we will perform sanitization on
+- `cd <mirror-repo-dest>`
+- `git-filter-repo --dry-run --replace-text replacements.txt` to perform a dry-run text replacement across all files of the repo (`replacements.txt` should have one regex per line)
+- `diff --color .git/filter-repo/fast-export.original .git/filter-repo/fast-export.filtered` to preview changes
+- `git-filter-repo --replace-text replacements.txt` to perform the actual text replacement
+- `git reflog --expire=now --all` to expire all reflog entries so they become unreachable and removable
+- `git gc --prune=now --aggressive` to remove all expired reflog entries and perform aggressive repo optimizations (**NOTE:** `--aggressive` is potentially very slow for large repos)
+- `git push --force --all` to overwrite all branches on the remote repo
+- `git push --force --tags` to overwrite all tags on the remote repo
+
+## `git subtree` (*merge subtrees together and split repository into subtrees*)
 
 - Manpage
   > Subtrees allow subprojects to be included within a subdirectory of the main project, optionally including
