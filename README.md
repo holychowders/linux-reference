@@ -1384,25 +1384,82 @@ If you forgot to use `sudo` to open a file, you can redirect the contents of the
 
 # GDB
 
-- `(gdb) watch x` - Break when the value of `x` changes
-`p /t variable_name` - Print variable value in specific format
-  - `/d` — decimal
-  - `/x` — hexadecimal
-  - `/o` — octal
-  - `/t` — binary
-  - `/u` — unsigned decimal
-  - `/c` — character
-  - `/f` — floating point
+See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf>
+
+## Interactive Session
+
+### Common
+
+- `help`
+  - `help` for general help
+  - `help <command>` for help on a command
+  - `apropos -v <word>` for full documentation of commands related to `<word>`
+- `file <program>` to load a program
+- `b[reak] [file:]<function>` to break at `<function>` in `file`
+- `r[un] [arguments]` to re/start the loaded program with `arguments`
+- `s[tep] [count]` to step into the next instruction `count` times
+- `n[ext] [count]` to step over the next instruction `count` times
+- Press `Enter` to repeat the last command
+- `i[nfo]`
+  - `break` to list breakpoints
+  - `watch` to list watchpoints
+  - `locals` to list local variables
+  - `args` to list arguments to current function
+  - `registers` to print the state of the registers
+  - `address main` to print the address of symbol `main`
+  - `sharedlibrary` to print status of shared object libraries
+  - `proc mappings` to list proces
+- `p[rint]`
+  - `<expression>` to evaluate and print `<expression>`
+  - `<variable>` to print variable
+    - `/d` — decimal
+    - `/x` — hexadecimal
+    - `/o` — octal
+    - `/t` — binary
+    - `/u` — unsigned decimal
+    - `/c` — character
+    - `/f` — floating point
+- `watch`
+  - `watch x` to break when symbol `x` changes
+  - `watch <expression>` to break when `expression` evaluates true
+- `c[ontinue]` to continue running the program if paused
+
+### More
+
+- `core-file <core>` to load a core dump
+- `clear` to delete all breakpoints
+- `delete <breakpoints>` to delete breakpoints
+- `frame` to print current frame
+- `bt` for backtrace
+- `list .` to list current position in the source
+- `disas main` to disassemble symbol `main`
+- `x/10i main` to examine the first `10` lines of `i`nstructions of symbol `main` in memory
 
 # Binary Analysis
 
-- `ldd` (print shared object dependencies)
-  - **WARNING**: Some versions of ldd may run the binaries to try to determine dependencies. **Never use on untrusted binaries**. Use `objdump -p <binarie> | grep NEEDED` instead.
+- `ldd` (*print shared object dependencies*)
+  - **WARNING(SECURITY)**: Some versions of `ldd` may try to execute the binary to resolve dependencies. Prefer `objdump -p <binary> | grep NEEDED` when working with untrusted binaries.
   - `ldd <binary>`
-- `objdump` (display information from object files)
-  - `objdump -p <binary> | grep NEEDED` to see shared object dependencies
-- `xxd`
-- `hexdump`
+- `objdump` (*display information from object files*)
+  - `-d` to disassemble
+  - `-g` to display debugging information
+  - `-h` to display summaries from each section header
+  - `-f` to display overall summary from each section header
+  - `-p` to display headers
+  - `-s` to display full contents of each section (hex dump)
+    - Use with `-j <name>` to select a particular section
+    - Use with `-Z` to decompress any compressed sections
+  - `-j <name>` to display information for a specific section
+  - `-x` to display all header information
+  - `--start-address=<address>`
+  - `--stop-address=<address>`
+  - Example: `objdump -p <binary> | grep NEEDED` to see shared object dependencies
+- `xxd` (*make a hex dump or do the reverse*)
+  - `xxd <file>` to dump hex for file
+  - `-b` to dump binary instead of hex
+  - `-r` to revert a patched hex dump back into binary format
+- `hexdump` (*display file contents in hexadecimal, decimal, octal, or ascii*)
+  - `hexdump -C <file>` to display hex in canonical form (hex+ASCII)
 
 # ASCII Art and Silly Stuff
 
