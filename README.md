@@ -340,14 +340,17 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - `lsof /dev/tty1` to list processes currently using that file
   - `lsof -i :22` to list processes using or listening by any network address on port 22 (`netstat -p` and variants are the modern ways to do this)
 - `ps` (*report a snapshot of the current processes*)
-  - `ps -f <pid>` reports on a process
+  - `ps` to report on all processes with the same EUID as the current user and processes associated with the same terminal as the invoker
+  - `ps <pid>` to report on a specific process
+  - `-f` for full format
+  - `ps -eM` or `ps axZ` to see the security label of every running process
   - **Mix and Match**: Use a bracket expression trick `[<char>]` in `grep`'s regular expression parsing to remove `grep`'s process from `ps` output: `ps -ef | grep -i [s]sh`
     - See `Character Classes and Bracket Expressions` in `man grep`
     - This works because `grep`'s process command line now technically contains `[s]sh`, which still expands to `ssh` as our actual search term
-  - Standard:
+  - Standard syntax
     - `ps -ef --forest` to *see every process on the system using standard syntax* and with *ASCII art process tree* (`--forest`)
     - `-F` for extra full format
-  - BSD:
+  - BSD syntax
     - `ps aux` to *see every process on the system using BSD syntax*
     - `ps axjf` to *print a process tree*
 - `pgrep`, `pkill`, `pidwait` (*look up, signal, or wait for processes based on name and other attributes*)
@@ -366,6 +369,9 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
     - `cat environ` to read the environment variables for the process
     - `cat cmdline` to read the full command which started the process
     - `strace -p <PID>` to monitor syscalls made by the process
+- `pidstat` (*report statistics for Linux tasks*; from `sysstat`)
+  - `pidstat`
+  - `-p` to report for PID
 
 # User Administration
 
@@ -507,6 +513,12 @@ S bits:   4 2 1
 
 # System Management and Observability
 
+- `sysctl` (*configure kernel parameters at runtime*)
+  - `<variable>` to display a parameter
+  - `-w <variable>=<value>` to set a parameter
+  - `-a` to display all available parameters
+  - `-p [file]` to reload the parameters set from `[file]` or `/etc/sysctl.conf`
+  - `--system` to reload and display parameters set from the system's configuration files
 - `hostname` (*show or set the system's host name*)
   - `/etc/hostname` specifies the persistent hostname (read on startup)
   - `hostname -I` to display IP addresses
@@ -519,13 +531,59 @@ S bits:   4 2 1
 - `lsb_release` (*print distribution-specific information (minimal implementation)*)
   - `lsb_release -a` to show distributor ID, description, release number, and codename
 - `cat /proc/cmdline` to see kernel command line options (**TODO**: Why is this different than the command line shown in `dmesg | head`?)
+- `ulimit` (*modify shell resource limits*)
+  - `ulimit -a` to report all current limits
+  - `ulimit -c` to report limit on core dump size for the current shell
+    - `0` indicates that core dumping is disabled
+  - `ulimit -c <limit>` to specify the size limit for core dumps
+
+## Core Dumps
+
+**WARNING**: Enabling core dumps -- particularly universally -- can be risky. A core dump is a snapshot of a process taken at the time a process exits abnormally. Since this snapshot contains the process's memory and execution context, it can contain sensitive information. Proper care should be taken to manage core dumps when enabled, such as restricting access to other users and regular deletion. Do your own research, and don't enable them blindly.
+
+See `man core`
+
+### Enabling
+
+- Ephemeral (for the current shell only)
+  - `ulimit -c unlimited` to enable unlimited core dumps for the current shell only (ephemeral)
+- Persistent (using shell init configuration)
+  - *NOTE*: This will enable core dumps only for processes launched by the shell rather than all processes launched through any means. You can modify the PAM limits configuration if you need core dumps enabled for all processes. In addition, for `systemd`-managed sessions, you can specify the core dump limit for a specific process)
+  - Append `ulimit -c unlimited` to your shell init (eg, `.bashrc`)
+- Persistent (using PAM limits configuration; **NOTE**: Incomplete)
+  - Create the drop-in `/etc/security/limits.d/99-coredump.conf`
+  - **TODO**: Configuration file
+
+### Core Pattern
+
+- `/proc/sys/kernel/core_pattern` stores a pattern to specify the core save location or pipe to program to process it
+- Common core patterns
+  - `core.%e.%p` to store core dumps beside the program (CWD is default)
+  - `/var/dumps/core.%e.%p` to store core dumps in a centralized location
+  - Variables
+    - `%e`: Executable name
+    - `%p`: PID
+    - `%t`: Timestamp (epoch)
+    - `%h`: Hostname
+    - `%u`: RUID
+- Ephemeral modification (persists until reboot)
+  - `/proc/sys/kernel/core_pattern`
+- Persistent modification
+  - Create the drop-in `/etc/sysctl.d/99-coredump.conf`
+  - Insert `kernel.core_pattern = <core-pattern>`
+  - `sysctl --system` to reload the configuration
+  - Alternative method (**Not recommended**: prefer drop-in configuration to preserve this default)
+    - `sysctl -w 'kernel.core_pattern = <core-pattern>'` to overwrite the current rule
 
 ## Logging
 
 - `sar` (*collect, report, or save system activity information*)
+  - `-b` for I/O statistics
+  - `-n` for network statistics
 - `dmesg` (*print or control the kernel ring buffer*)
   - `dmesg -Tw` (show log messages in human-readable time format (`-T`) and in real time (`-w`))
   - `dmesg | head` to see the early kernel command line options (**TODO**: Why is this different than shown in `cat /proc/cmdline`?)
+  - `dmesg | tail` to see the latest log messages
 - `/var/log/` contains
   - `/var/log/dmesg`
   - `/var/log/auth.log`
@@ -542,6 +600,8 @@ S bits:   4 2 1
 - `iostat` (*Report Central Processing Unit (CPU) statistics and input/output statistics for devices and partitions*; from `sysstat`)
   - `iostat [interval [count]] [-d] [device-name]` to report block device statistics
   - `-c` to report CPU statistics
+  - `-x` for extended statistics
+  - `-z` to omit statistics for devices showing no activity
 
 ## CPU
 
@@ -549,8 +609,9 @@ S bits:   4 2 1
 - `lscpu` (*display information about the CPU architecture*)
 - `chcpu` (*configure CPUs*)
 - `mpstat` (*report processor-related statistics*; from `sysstat`)
-  - `mpstat` to print a report
+  - `mpstat` to print a summary CPU utilization report
   - `mpstat 1` to print a report every 1 second
+  - `-P ALL` to print statistics for all processors
 - `nproc` (*print the number of processing units available*)
 - `cat /proc/cpuinfo` to see CPU specs and info
   - `cat /proc/cpuinfo | grep -c processor` to count the number of processors
@@ -561,6 +622,7 @@ S bits:   4 2 1
 - `free` (*display amount of free and used memory in the system*)
   - `-h` for human-readable
   - `-t` to include total
+  - `-m` to display in mebibytes
 - `vmstat -S M` (show virtual memory statistics in units of MB `-S M`)
 
 ## `systemd` (*systemd system and service manager*)
@@ -1192,7 +1254,7 @@ S bits:   4 2 1
     - `--restart=always` restarts the container under all circumstances (reboot, crash, etc) execpt manual stop/kill via Docker
     - `--name <container-name>` provides a name to the container
   - `docker [container] run -dit  --name <container>  --network <network-name>  <image-name>  sh` creates and starts up a container with the assigned name, network, and image. It starts in detached mode running `sh`.
-    - **NOTE**: New containers are generally added to the default bridge network, `docker0`
+    - *NOTE*: New containers are generally added to the default bridge network, `docker0`
 
 # Git
 
@@ -1459,6 +1521,7 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
   - `-b` to dump binary instead of hex
   - `-r` to revert a patched hex dump back into binary format
 - `hexdump` (*display file contents in hexadecimal, decimal, octal, or ascii*)
+  - `hexdump <file>` to dump hex for file
   - `hexdump -C <file>` to display hex in canonical form (hex+ASCII)
 
 # ASCII Art and Silly Stuff
