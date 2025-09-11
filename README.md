@@ -18,6 +18,21 @@ My personal Linux system administration reference
 - [User Administration](#user-administration)
 - [System Management and Observability](#system-management-and-observability)
 - [Networking](#networking)
+  - [Misc](#misc)
+  - [DHCP](#dhcp)
+  - [netplan](#netplan-netplan-runtime-cli)
+  - [File Transfer](#file-transfer)
+  - [Network Analysis](#network-analysis)
+  - [Traffic Analysis and Manipulation](#traffic-analysis-and-manipulation)
+  - [Scapy](#scapy-interactive-packet-manipulation-tool)
+  - [Ettercap and Bettercap](#ettercap-and-bettercap)
+  - [proxychains](#proxychains-redirect-connections-through-proxy-servers)
+  - [SSH](#ssh)
+  - [netfilter Firewall Framework](#netfilter-firewall-framework)
+  - [netcat](#netcat-arbitrary-tcp-and-udp-connections-and-listens)
+  - [dnsutils](#dnsutils)
+  - [net-tools](#net-tools-deprecated-in-favor-of-iproute2)
+  - [iproute2](#iproute2-replaces-net-tools)
 - [Docker](#docker)
 - [Git](#git)
 - [Bash](#bash)
@@ -1005,6 +1020,7 @@ See `man core`
     - `set dns.spoof.hosts <hostsfile>` to perform DNS spoofing for the entries mapped in `<hostsfile>`
 
 ## `proxychains` (*redirect connections through proxy servers*)
+
 - `proxychains`
   - `proxychains` captures the network traffic (eg, Nmap TCP scan pings) of any given command and redirects it through proxies specified in the configuration file
     - Configuration: `/etc/proxychains(4).conf`
