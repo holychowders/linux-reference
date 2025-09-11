@@ -9,25 +9,20 @@ My personal Linux system administration reference
 - [General and Misc](#general-and-misc)
 - [Text and File Processing](#text-and-file-processing)
 - [Storage and Filesystem](#storage-and-filesystem)
-- [Logging](#logging)
+  - [File and Text Searching](#file-and-text-searching)
+  - [Data Processing](#data-processing)
+  - [Data Erasure](#data-erasure)
+  - [Storage and Filesystem Information and Management](#storage-and-filesystem-information-and-management)
+  - [Access Control](#access-control)
 - [Process Management](#process-management)
 - [User Administration](#user-administration)
 - [System Management and Observability](#system-management-and-observability)
 - [Networking](#networking)
-  - [Misc](#misc)
-  - [netplan](#netplan-netplan-runtime-cli)
-  - [Traffic Analysis and Manipulation](#traffic-analysis-and-manipulation)
-  - [SSH](#ssh)
-  - [netfilter Firewall Framework](#netfilter-firewall-framework)
-  - [netcat](#netcat-arbitrary-tcp-and-udp-connections-and-listens)
-  - [dnsutils](#dnsutils)
-  - [net-tools](#net-tools-deprecated-in-favor-of-iproute2)
-  - [iproute2](#iproute2-replaces-net-tools)
 - [Docker](#docker)
 - [Git](#git)
-- [GDB](#gdb)
 - [Bash](#bash)
 - [Vim](#vim)
+- [GDB](#gdb)
 - [Binary Analysis](#binary-analysis)
 - [ASCII Art and Silly Stuff](#ascii-art-and-silly-stuff)
 - [Credits](#credits)
@@ -144,6 +139,8 @@ My personal Linux system administration reference
 
 # Storage and Filesystem
 
+## General and Misc
+
 - `hdparm` (*get/set SATA/IDE device parameters*)
   - `-I /dev/<sata-device>` to list device parameters for a SATA device
   - `hdparm --security-enhanced-erase NULL /dev/<sata-device>` to perform an optimized secure erase of a SATA device using an empty password (`NULL`)
@@ -151,7 +148,7 @@ My personal Linux system administration reference
   - `nvme format /dev/<nvme-device> -s 1` to perform a secure erase of an NVMe disk
     - See `man nvme-format`
 
-## Information
+### Information
 
 - `/dev/zero` is a continuous stream of zeroes
 - `stat` (*display file or file system status*)
@@ -161,7 +158,7 @@ My personal Linux system administration reference
   - `-s` for summary
 - `df -h` (*report file system space usage* in human-readable format)
 
-## Searching
+## File and Text Searching
 
 - `grep` (*print lines that match patterns*)
   - `grep -Iri --exclude-dir=.git "<search-pattern>"` to search `<search-pattern>`, excluding binaries (`-I`), recursive (`-r`), case insensitive (`-i`), and excluding `.git/`
@@ -186,7 +183,7 @@ My personal Linux system administration reference
     - `-type f` to find files
     - `-type d` to find directories
 
-## Processing
+## Data Processing
 
 - `cpio` (*copy files to and from archives*)
 - `mkfifo` (*make FIFOs (named pipes)*)
@@ -215,7 +212,7 @@ My personal Linux system administration reference
     - Optional: `blockdev --rereadpt` (see `blockdev`) to inform the kernel that the partition table has been modified (assuming you overwrote a disk with paritions before clearing them out). This may not be enough, and you may need to just reboot instead.
 - `nwipe` (*securely erase disks*)
 
-## Filesystem
+## Storage and Filesystem Information and Management
 
 ### Information
 
@@ -1551,7 +1548,7 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
 - `echo Welcome back @home, holy! | boxes -d bear -s $COLUMNS`
 - `echo Welcome back @home, holy! | boxes -d spring -s $((COLUMNS-9))`
 
-## Credits
+# Credits
 
 - GitHub repo: <https://github.com/holychowders/linux-reference>
 - GitHub profile: <https://github.com/holychowders>
