@@ -1470,17 +1470,17 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
   - `help <command>` for help on a command
   - `apropos -v <word>` for full documentation of commands related to `<word>`
 - `file <program>` to load a program
-- `b[reak] [file:]<function>` to break at `<function>` in `file`
+- `b[reak] [file:][function]>` to break at the current line or `[function]` in `[file]`
 - `r[un] [arguments]` to re/start the loaded program with `arguments`
 - `s[tep] [count]` to step into the next instruction `count` times
 - `n[ext] [count]` to step over the next instruction `count` times
 - Press `Enter` to repeat the last command
 - `i[nfo]`
-  - `break` to list breakpoints
-  - `watch` to list watchpoints
+  - `[b]reak[points]` to list breakpoints
+  - `watch[points]` to list watchpoints
   - `locals` to list local variables
   - `args` to list arguments to current function
-  - `registers` to print the state of the registers
+  - `[r]egisters` to print the state of the registers
   - `address main` to print the address of symbol `main`
   - `sharedlibrary` to print status of shared object libraries
   - `proc mappings` to list proces
@@ -1503,7 +1503,7 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
 
 - `core-file <core>` to load a core dump
 - `clear` to delete all breakpoints
-- `delete <breakpoints>` to delete breakpoints
+- `delete <breakpoint-numbers>` to delete breakpoints
 - `frame` to print current frame
 - `bt` for backtrace
 - `list .` to list current position in the source
