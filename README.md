@@ -1202,6 +1202,7 @@ See `man core`
 
 # Docker
 
+- Since Docker Engine version `28.4.0 d8eb465`: <https://docs.docker.com/engine/release-notes/28/#2840>
 - See the Docker CLI reference: <https://docs.docker.com/reference/cli/docker>
 - See the Dockerfile reference: <https://docs.docker.com/reference/dockerfile>
 - See Docker Hub image search: <https://hub.docker.com/search>
@@ -1225,6 +1226,12 @@ See `man core`
   - `docker network ls` lists networks available to connect to a container
   - `docker network inspect <network-name>` to inspect a network's configuration, including connected containers and their IP addresses
 - `docker builder prune -a` to remove all image build cache
+- `docker system` (manage docker)
+  - `docker [system] events` to monitor server events in real time
+  - `docker system df` to show disk usage
+    - `-v` for detailed breakdown
+  - `docker [system] info` to show general Docker and system information
+  - `docker system prune` to remove unused data
 
 ## Images
 
@@ -1242,10 +1249,11 @@ See `man core`
   - `-a` to see all containers
   - `-q` to list container IDs only
 - `docker [container] inspect <container>` to view a container's configuration
+- `docker [container] stats [containers]` to monitor resource utilization for all or some containers
 - `docker [container] top <container>` to list a container's running processes
 - `docker [container] exec -it <container> <command>` to execute `<command>` in interactive mode with an explicitly allocated TTY
   - Use the same command without `-it` to execute a non-interactive command (one which does not expect STDIN to remain open during execution) within a container
-    - For example, `apk --version` would execute and exit, no input/interaction required, just output
+    - For example, `apk --version` would execute, output, and exit, no input/interaction
 - `docker [container] attach <container>` to attach to a container
 - Stopping containers:
   - `docker [container] stop <container>` to stop a container from running
@@ -1268,6 +1276,10 @@ See `man core`
     - `--name <container-name>` provides a name to the container
   - `docker [container] run -dit  --name <container>  --network <network-name>  <image-name>  sh` creates and starts up a container with the assigned name, network, and image. It starts in detached mode running `sh`.
     - *NOTE*: New containers are generally added to the default bridge network, `docker0`
+  - Container priviliges and capabilities
+    - See the docs: <https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities>
+    - `--cap-add` or `--cap-drop` to add or remove container priviliges and capabilities
+    - `--device=[]` to allow a device to run inside a container
 
 # Git
 
@@ -1470,7 +1482,7 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
   - `help <command>` for help on a command
   - `apropos -v <word>` for full documentation of commands related to `<word>`
 - `file <program>` to load a program
-- `b[reak] [file:][function]>` to break at the current line or `[function]` in `[file]`
+- `b[reak] [file:][function]` to break at the current line or `[function]` in `[file]`
 - `r[un] [arguments]` to re/start the loaded program with `arguments`
 - `s[tep] [count]` to step into the next instruction `count` times
 - `n[ext] [count]` to step over the next instruction `count` times
@@ -1503,7 +1515,7 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
 
 - `core-file <core>` to load a core dump
 - `clear` to delete all breakpoints
-- `delete <breakpoint-numbers>` to delete breakpoints
+- `d[elete] [breakpoint-numbers]` to delete the breakpoint at the cursor or those specified
 - `frame` to print current frame
 - `bt` for backtrace
 - `list .` to list current position in the source
@@ -1515,6 +1527,15 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
 - `ldd` (*print shared object dependencies*)
   - **WARNING(SECURITY)**: Some versions of `ldd` may try to execute the binary to resolve dependencies. Prefer `objdump -p <binary> | grep NEEDED` when working with untrusted binaries.
   - `ldd <binary>`
+- `readelf` (*display information about ELF files*)
+  - `-W` for wide display
+  - `-a`
+  - `-h` to display the ELF header information
+  - `-s` to dump symbols
+    - `-C` to demangle (C++)
+  - `-e` to display all headers
+  - `-V` to display version sections
+  - `-A` to display architecture-specific information
 - `objdump` (*display information from object files*)
   - `-d` to disassemble
   - `-g` to display debugging information
@@ -1529,6 +1550,8 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
   - `--start-address=<address>`
   - `--stop-address=<address>`
   - Example: `objdump -p <binary> | grep NEEDED` to see shared object dependencies
+- `binwalk` (*search binary images for embedded files and executable code*; **TODO**)
+- `valgrind` (*suite of tools for debugging and profiling programs*; **TODO**)
 - `xxd` (*make a hex dump or do the reverse*)
   - `xxd <file>` to dump hex for file
   - `-b` to dump binary instead of hex
