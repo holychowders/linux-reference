@@ -13,7 +13,7 @@ My personal Linux system administration reference
   - [Data Processing](#data-processing)
   - [Data Erasure](#data-erasure)
   - [Storage and Filesystem Information and Management](#storage-and-filesystem-information-and-management)
-    - [Logical Volume Manager](#logical-volume-manager-lvm)
+    - [Logical Volume Manager (LVM)](#logical-volume-manager-lvm)
   - [Access Control](#access-control)
 - [Process Management](#process-management)
 - [User Administration](#user-administration)
