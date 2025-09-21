@@ -1,6 +1,6 @@
 # Linux System Administration Reference
 
-My personal Linux system administration reference
+My personal Linux system administration reference (based on Ubuntu Server)
 
 ## Table of Contents
 
@@ -102,6 +102,8 @@ My personal Linux system administration reference
     - `tee -a <file>` to append to `<file>` instead of overwrite
 - `cat /dev/urandom` (*When read, the `/dev/urandom` device returns random bytes using a pseudorandom number generator seeded from the entropy  pool*)
   - See `man urandom`
+- Intrusion prevention systems
+  - `fail2ban`
 - Intrusion detection systems
   - `aide`
   - `snort`
@@ -422,7 +424,9 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - `-c <command>` to run a command as the user
   - `-s <shell>` to specify shell
   - `-l` to start the shell as a login shell
-- `sudo -i` to run the login shell as `root` (ie, become `root`)
+- `sudo`
+  - `-i` to run the login shell as `root` (ie, become `root`)
+  - `-l [-U <user>]` to list user's command privileges and `sudo` configurations as configured in sudoers configuration (`/etc/sudoers` or `/etc/sudoers.d/`)
 
 ## User Interaction
 
@@ -617,21 +621,27 @@ See `man core`
 
 ## Logging
 
-- `sar` (*collect, report, or save system activity information*)
+- `rsyslog`
+- `sar` (*collect, report, or save system activity information*; from `sysstat`)
   - `-b` for I/O statistics
-  - `-n` for network statistics
+  - `-n <type>` for network statistics
+  - `--iface=<iface>` for a specific network interface
+  - Example: `sar -n TCP 1` to print TCP statistics for all interfaces every 1 second
 - `dmesg` (*print or control the kernel ring buffer*)
   - `dmesg -Tw` (show log messages in human-readable time format (`-T`) and in real time (`-w`))
   - `dmesg | head` to see the early kernel command line options (**TODO**: Why is this different than shown in `cat /proc/cmdline`?)
   - `dmesg | tail` to see the latest log messages
-- `/var/log/` contains
-  - `/var/log/dmesg`
-  - `/var/log/auth.log`
-  - `/var/log/apt/history.log`
-  - `/var/log/syslog`
+- `/var/log/` contains log files
+  - `dmesg` for Kernel ring buffer (hardware and driver)
+  - `apt/history.log` for package install/removal history
+  - `syslog` (Ubuntu) or `messages` (Red Hat) for daemon logs, system messages, and non-authorization events
+  - `auth.log` (Ubuntu) or `secure` (Red Hat) for authorization attempts (logins, SSH, etc)
+  - `journal/` for binary `systemd` journal files managed by `systemd-journald`
+    - See: Section on `journalctl`; `/run/log/journal` for volatile `tmpfs` journals; `man tmpfs`
   - ...and more
 - `loki`
 - `syslogger`
+- `auditd`
 
 ## Devices
 
@@ -678,6 +688,10 @@ See `man core`
   - `systemctl list-sockets` to list socket units currently in memory, ordered by listening addresses
   - `systemctl list-timers` to list timer units currently in memory, ordered by when they elapse next
 - `journalctl` (*print log entries from the systemd journal*)
+  - Storage location and format
+    - Journals are stored in binary format
+    - Persistent journals stored in `/var/log/journal/`, volatile journals stored in `/run/log/journal/` (see section on logging)
+    - `journalctl` merges both sources in output
   - `journalctl -f` to see log messages in real time
   - `journalctl -b` to see all logs since boot of current session
   - `journalctl -u wpa_supplicant` to see logs pertaining to the `wpa_supplicant` service
@@ -811,6 +825,9 @@ See `man core`
 ## Network Analysis
 
 - See [`dnsutils`](#dnsutils)?
+- `iperf3` (*perform network throughput tests*)
+  - `iperf3 -s` to listen
+  - `iperf3 -c <address>` to connect
 - `mtr` (*a network diagnostic tool*)
   - *mtr combines the functionality of the traceroute and ping programs in a single network diagnostic tool*
   - `mtr -t` runs `mtr` in terminal mode
@@ -873,8 +890,10 @@ See `man core`
 
 ## Traffic Analysis and Manipulation
 
+- `ngrep` (*network grep*)
 - `tcpdump` (*dump traffic on a network*)
   - Compared to `tshark`: quick and simplex filtering; lightweight and widely available (pre-installed on most systems); uses `libpcap` for backend
+  - `tcpdump ip` to monitor only IPv4 traffic
   - `tcpdump not host <host>` to monitor all traffic not associated with `<host>`
   - `tcpdump -p` to monitor traffic destined to or originating from our host (disable promiscuous mode)
   - `tcpdump port <port> or host <host>` to monitor a specific port or host's traffic
@@ -1552,6 +1571,7 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
 
 # Binary Analysis
 
+- `ltrace` (*a library call tracer*)
 - `ldd` (*print shared object dependencies*)
   - **WARNING(SECURITY)**: Some versions of `ldd` may try to execute the binary to resolve dependencies. Prefer `objdump -p <binary> | grep NEEDED` when working with untrusted binaries.
   - `ldd <binary>`
