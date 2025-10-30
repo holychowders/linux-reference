@@ -102,12 +102,14 @@ My personal Linux system administration reference (based on Ubuntu Server)
     - `tee -a <file>` to append to `<file>` instead of overwrite
 - `cat /dev/urandom` (*When read, the `/dev/urandom` device returns random bytes using a pseudorandom number generator seeded from the entropy  pool*)
   - See `man urandom`
-- Intrusion prevention systems
-  - `fail2ban`
-- Intrusion detection systems
-  - `aide`
-  - `snort`
-  - `tripwire`
+- Security
+  - `clamav`
+  - Intrusion prevention systems
+    - `fail2ban`
+  - Intrusion detection systems
+    - `aide`
+    - `snort`
+    - `tripwire`
 - `exiftool` (*read and write meta information in files*)
 - `reset` (*initialize or reset terminal state*)
 - `seq` (*print a sequence of numbers*)
@@ -373,6 +375,8 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
 - The current process:
   - `echo $$` to print the PID of this current running process
   - `cd /proc/self/` to access the data for the current running process
+- `ltrace` (*library call tracer*)
+  - `ltrace -p <PID>` to monitor library calls made by process `<PID>`
 - `strace` (*trace system calls and signals*)
   - `strace -p <PID>` to monitor syscalls made by process `<PID>`
   - `strace -p <PID> -e trace=read` to trace `read` syscalls emitted from process `<PID>`
@@ -483,6 +487,7 @@ It is commonly found in the SELinux (Security-Enhanced Linux) and AppArmor Linux
   - `groupadd` (*create a new group*)
   - `groupdel` (*delete a group*)
 - User accounts:
+  - See `sysusers.d` in the section: System Management and Observability
   - `useradd`
     - `useradd <new-user> -m -s /bin/bash -g <primary-group>` to create `<new-user>` with a home directory (`-m`), `bash` as shell (`-s /bin/bash`), and with primary group `<primary-group>` (`-g <primary-group>`) (**NOTE(SECURITY): DO NOT SUPPLY PLAINTEXT PASSWORD ON COMMAND LINE, SEE MANPAGE**)
       - This creates a locked user account due to **correctly** not passing a password
@@ -557,6 +562,11 @@ S bits:   4 2 1
 
 # System Management and Observability
 
+- `sysusers.d` (*declarative allocation of system users and groups*)
+  - `man sysusers.d`
+    - *systemd-sysusers uses the files from sysusers.d directory to create system users and groups and to add users to groups, at package installation or boot time*
+- `lsmod` (*show the status of modules in the Linux Kernel*)
+  - Reads `/proc/modules`
 - `sysctl` (*configure kernel parameters at runtime*)
   - `<variable>` to display a parameter
   - `-w <variable>=<value>` to set a parameter
@@ -825,6 +835,7 @@ See `man core`
 ## Network Analysis
 
 - See [`dnsutils`](#dnsutils)?
+- `host` (*DNS lookup utility*)
 - `iperf3` (*perform network throughput tests*)
   - `iperf3 -s` to listen
   - `iperf3 -c <address>` to connect
@@ -1234,6 +1245,7 @@ See `man core`
 
 - `ss` (*another utility to investigate sockets*)
   - `ss -a | grep -i ssh` to find sockets/programs running `ssh`, and uids with established SSH connections
+  - `ss -ntulp` to find processes listening (`-l`) on TCP (`-t`) and UDP (`-u`) sockets. Show the process (`-p`) and do not resolve addresses (`-n`)
 - `ip` (*show / manipulate routing, network devices, interfaces and tunnels*)
   - `-br` for brief output (supported by `addr`, `link`, `neigh`)
   - `addr`
@@ -1289,6 +1301,7 @@ See `man core`
 - `docker image[s | ls]` to list images
   - `-q` to list IDs only
 - `docker [container] commit <container> [<image-name>:<tag>]` persists a running container as a new image
+- `docker image rm <container> [-f]` to remove an image
 
 ## Containers
 
@@ -1571,7 +1584,6 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
 
 # Binary Analysis
 
-- `ltrace` (*a library call tracer*)
 - `ldd` (*print shared object dependencies*)
   - **WARNING(SECURITY)**: Some versions of `ldd` may try to execute the binary to resolve dependencies. Prefer `objdump -p <binary> | grep NEEDED` when working with untrusted binaries.
   - `ldd <binary>`
@@ -1586,6 +1598,7 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
   - `-A` to display architecture-specific information
 - `objdump` (*display information from object files*)
   - `-d` to disassemble
+  - `-t` to display symbols
   - `-g` to display debugging information
   - `-h` to display summaries from each section header
   - `-f` to display overall summary from each section header
@@ -1598,6 +1611,7 @@ See the excellent GDB Quick Reference by UTexas: <https://users.ece.utexas.edu/~
   - `--start-address=<address>`
   - `--stop-address=<address>`
   - Example: `objdump -p <binary> | grep NEEDED` to see shared object dependencies
+- `nm` (*list symbols from object files*)
 - `binwalk` (*search binary images for embedded files and executable code*; **TODO**)
 - `valgrind` (*suite of tools for debugging and profiling programs*; **TODO**)
 - `xxd` (*make a hex dump or do the reverse*)
