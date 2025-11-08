@@ -1387,6 +1387,7 @@ See `man core`
   > subtrees work. A subtree is just a subdirectory that can be committed to, branched, and merged along with
   > your project in any way you want.
 - `git subtree add --prefix=<where/to/put/it> <repo> <ref>` to add a subtree within a repo
+  - Use `--squash` to squash the subtree's history into a single commit
 
 ### Details
 
